@@ -29,7 +29,7 @@ jobs:
       run: |
         docker run -d \
           --name backend \
-          -p 3002:3002 \
+          -p 3003:3002 \
           -e VAULT_ADDR=${{ secrets.VAULT_ADDR }} \
           -e ROLE_ID=${{ secrets.ROLE_ID }} \
           -e SECRET_ID=${{ secrets.SECRET_ID }} \
