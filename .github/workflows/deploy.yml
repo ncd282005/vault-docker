@@ -1,4 +1,4 @@
-name: Deploy master
+name: Deploy main
 on:
   push:
     branches:
@@ -25,3 +25,5 @@ jobs:
         version_label: ${{ github.sha }}
         region: us-east-1
         deployment_package: aws-backend.zip
+        web: node app.js
+        

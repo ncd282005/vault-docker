@@ -29,7 +29,7 @@ const { clientCrone } = require("./controllers/demo/clientCrone.controller");
 //};
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3002;
 
 // Middleware
 app.use(cors());
@@ -52,7 +52,7 @@ app.use("/api/v1/webhook/shopify", webhookShopifyRoutes);
 app.get("/", (req, res) => {
   res.status(200).json({
     success: true,
-    message: " API IS RUNNING !!!"
+    message: " API IS RUNNING "
   });
 });
 
