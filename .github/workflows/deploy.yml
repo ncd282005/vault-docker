@@ -1,29 +1,39 @@
-name: Deploy main
+name: Deploy Node + Vault
+
 on:
   push:
-    branches:
-    - main
+    branches: [ "main" ]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  deploy:
+    runs-on: self-hosted
+
     steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
 
-    - name: Checkout source code
-      uses: actions/checkout@v2
+    - name: Stop Old Container
+      run: |
+        docker stop backend || true
+        docker rm backend || true
 
-    - name: Generate deployment package
-      run: zip -r aws-backend.zip . -x '*.git*'
+    - name: Remove Old Image
+      run: |
+        docker rmi backend:latest || true
 
-    - name: Deploy to EB
-      uses: einaregilsson/beanstalk-deploy@v22
-      with:
-        aws_access_key: ${{ secrets.ACCESS_KEY }}
-        aws_secret_key: ${{ secrets.SECRET_ACCESS_KEY }}
-        application_name: beanstalk
-        environment_name: beanstalk-env-2
-        version_label: ${{ github.sha }}
-        region: us-east-1
-        deployment_package: aws-backend.zip
-        web: node app.js
-        
+    - name: Build Image
+      run: |
+        docker build -t backend:latest .
+
+    - name: Run Container with Vault ENV
+      run: |
+        docker run -d \
+          -p 3002:3002 \
+          --name backend \
+          -e VAULT_ADDR=${{ secrets.VAULT_ADDR }} \
+          -e ROLE_ID=${{ secrets.ROLE_ID }} \
+          -e SECRET_ID=${{ secrets.SECRET_ID }} \
+          backend:latest
+
+    - name: Show Running Containers
+      run: docker ps
