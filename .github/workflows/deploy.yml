@@ -6,34 +6,33 @@ on:
 
 jobs:
   deploy:
-    runs-on: ubuntu:latest
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
 
-    - name: Stop Old Container
-      run: |
-        docker stop backend || true
-        docker rm backend || true
+    - name: Deploy via SSH
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.SERVER_IP }}
+        username: ${{ secrets.SERVER_USER }}
+        password: ${{ secrets.SERVER_PASSWORD }}
+        script: |
+          cd /home/ubuntu/aws-backend
 
-    - name: Remove Old Image
-      run: |
-        docker rmi backend:latest || true
+          git pull origin main
 
-    - name: Build Image
-      run: |
-        docker build -t backend:latest .
+          docker stop backend || true
+          docker rm backend || true
+          docker rmi backend:latest || true
 
-    - name: Run Container with Vault ENV
-      run: |
-        docker run -d \
-          -p 3002:3002 \
-          --name backend \
-          -e VAULT_ADDR=${{ secrets.VAULT_ADDR }} \
-          -e ROLE_ID=${{ secrets.ROLE_ID }} \
-          -e SECRET_ID=${{ secrets.SECRET_ID }} \
-          backend:latest
+          docker build -t backend:latest .
 
-    - name: Show Running Containers
-      run: docker ps
+          docker run -d \
+            -p 3002:3002 \
+            --name backend \
+            -e VAULT_ADDR=${{ secrets.VAULT_ADDR }} \
+            -e ROLE_ID=${{ secrets.ROLE_ID }} \
+            -e SECRET_ID=${{ secrets.SECRET_ID }} \
+            backend:latest
