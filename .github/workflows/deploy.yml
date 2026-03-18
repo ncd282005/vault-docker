@@ -28,7 +28,6 @@ jobs:
     - name: Run Container with Vault ENV
       run: |
         docker run -d \
-          -p 3002:3002 \
           --name backend \
           -e VAULT_ADDR=${{ secrets.VAULT_ADDR }} \
           -e ROLE_ID=${{ secrets.ROLE_ID }} \
